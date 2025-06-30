@@ -4,7 +4,6 @@ struct DateIdeasView: View {
     @EnvironmentObject var appState: AppState
     @State private var selectedDateIdea: DateIdea?
     @State private var isGeneratingMore = false
-    @State private var showingDetailSheet = false
     @State private var showingFilters = false
     
     // Filter States
@@ -162,7 +161,6 @@ struct DateIdeasView: View {
                                 CleanDateCard(dateIdea: dateIdea, index: index)
                                     .onTapGesture {
                                         selectedDateIdea = dateIdea
-                                        showingDetailSheet = true
                                     }
                             }
                         }
@@ -216,10 +214,8 @@ struct DateIdeasView: View {
                 }
             }
         }
-        .sheet(isPresented: $showingDetailSheet) {
-            if let selectedIdea = selectedDateIdea {
-                CleanDateDetailView(dateIdea: selectedIdea)
-            }
+        .sheet(item: $selectedDateIdea) { dateIdea in
+            CleanDateDetailView(dateIdea: dateIdea)
         }
     }
     
@@ -359,103 +355,130 @@ struct CleanDateDetailView: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 32) {
-                    // Hero Section
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text(dateIdea.title)
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundColor(.primary)
+                    // Hero Section with better styling
+                    VStack(alignment: .leading, spacing: 20) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(dateIdea.title)
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.primary)
+                                
+                                HStack(spacing: 4) {
+                                    Image(systemName: "flame.fill")
+                                        .foregroundColor(.orange)
+                                    Text("\(dateIdea.viralPotential) viral score")
+                                        .font(.subheadline)
+                                        .foregroundColor(.orange)
+                                }
+                            }
+                            
+                            Spacer()
+                        }
                         
                         Text(dateIdea.description)
                             .font(.body)
                             .foregroundColor(.secondary)
-                            .lineSpacing(4)
+                            .lineSpacing(6)
                     }
+                    .padding(.bottom, 8)
                     
-                    // Clean Stats Grid
+                    // Quick Info Cards
                     LazyVGrid(columns: [
                         GridItem(.flexible()),
                         GridItem(.flexible())
-                    ], spacing: 20) {
-                        CleanStatCard(title: "Cost", value: dateIdea.cost, icon: "dollarsign.circle", color: .green)
-                        CleanStatCard(title: "Duration", value: dateIdea.duration, icon: "clock", color: .blue)
-                        CleanStatCard(title: "Location", value: dateIdea.location.rawValue, icon: "location", color: .purple)
-                        CleanStatCard(title: "Viral Score", value: "\(dateIdea.viralPotential)/10", icon: "flame", color: .orange)
+                    ], spacing: 16) {
+                        QuickInfoCard(title: "Cost", value: dateIdea.cost, icon: "dollarsign.circle.fill", color: .green)
+                        QuickInfoCard(title: "Duration", value: dateIdea.duration, icon: "clock.fill", color: .blue)
+                        QuickInfoCard(title: "Location", value: dateIdea.location.rawValue, icon: "location.fill", color: .purple)
+                        QuickInfoCard(title: "Season", value: dateIdea.season.rawValue, icon: dateIdea.season.icon, color: dateIdea.season.color)
                     }
                     
-                    // Categories
+                    // Categories Section
                     if !dateIdea.categories.isEmpty {
-                        VStack(alignment: .leading, spacing: 16) {
+                        VStack(alignment: .leading, spacing: 12) {
                             Text("Categories")
                                 .font(.headline)
                                 .foregroundColor(.primary)
                             
-                            FlowLayout(spacing: 8) {
-                                ForEach(dateIdea.categories, id: \.self) { category in
-                                    Text(category.rawValue)
-                                        .font(.subheadline)
-                                        .foregroundColor(.white)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(category.color.opacity(0.8))
-                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    ForEach(dateIdea.categories, id: \.self) { category in
+                                        Text(category.rawValue)
+                                            .font(.subheadline)
+                                            .fontWeight(.medium)
+                                            .foregroundColor(.white)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 8)
+                                            .background(category.color)
+                                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    }
                                 }
+                                .padding(.horizontal, 1)
                             }
                         }
                     }
                     
-                    // Tags
+                    // Tags Section
                     if !dateIdea.tags.isEmpty {
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("Tags")
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Perfect For")
                                 .font(.headline)
                                 .foregroundColor(.primary)
                             
-                            FlowLayout(spacing: 8) {
-                                ForEach(dateIdea.tags, id: \.self) { tag in
-                                    Text("#\(tag)")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 4)
-                                        .background(Color.gray.opacity(0.1))
-                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    ForEach(dateIdea.tags, id: \.self) { tag in
+                                        Text(tag.capitalized)
+                                            .font(.caption)
+                                            .fontWeight(.medium)
+                                            .foregroundColor(.secondary)
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .background(Color.gray.opacity(0.1))
+                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    }
                                 }
+                                .padding(.horizontal, 1)
                             }
                         }
                     }
+                    
+                    Spacer(minLength: 40)
                 }
                 .padding(24)
             }
             .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Date Idea")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
                         dismiss()
                     }
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.primary)
                 }
             }
         }
     }
 }
 
-struct CleanStatCard: View {
+struct QuickInfoCard: View {
     let title: String
     let value: String
     let icon: String
     let color: Color
     
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.title2)
                 .foregroundColor(color)
             
-            VStack(spacing: 4) {
+            VStack(spacing: 2) {
                 Text(title)
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -464,6 +487,7 @@ struct CleanStatCard: View {
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
+                    .multilineTextAlignment(.center)
             }
         }
         .frame(maxWidth: .infinity)
@@ -475,63 +499,7 @@ struct CleanStatCard: View {
     }
 }
 
-// Keep the existing FlowLayout
-struct FlowLayout: Layout {
-    var spacing: CGFloat = 8
-    
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let rows = computeRows(proposal: proposal, subviews: subviews)
-        let height = rows.reduce(0) { $0 + $1.maxHeight } + CGFloat(max(0, rows.count - 1)) * spacing
-        return CGSize(width: proposal.width ?? 0, height: height)
-    }
-    
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let rows = computeRows(proposal: proposal, subviews: subviews)
-        var currentY = bounds.minY
-        
-        for row in rows {
-            var currentX = bounds.minX
-            
-            for subview in row.subviews {
-                subview.place(at: CGPoint(x: currentX, y: currentY), proposal: ProposedViewSize(width: subview.sizeThatFits(.unspecified).width, height: row.maxHeight))
-                currentX += subview.sizeThatFits(.unspecified).width + spacing
-            }
-            
-            currentY += row.maxHeight + spacing
-        }
-    }
-    
-    private func computeRows(proposal: ProposedViewSize, subviews: Subviews) -> [Row] {
-        var rows: [Row] = []
-        var currentRow = Row()
-        var currentRowWidth: CGFloat = 0
-        
-        for subview in subviews {
-            let subviewSize = subview.sizeThatFits(.unspecified)
-            
-            if currentRowWidth + subviewSize.width + spacing > (proposal.width ?? .infinity) && !currentRow.subviews.isEmpty {
-                rows.append(currentRow)
-                currentRow = Row()
-                currentRowWidth = 0
-            }
-            
-            currentRow.subviews.append(subview)
-            currentRow.maxHeight = max(currentRow.maxHeight, subviewSize.height)
-            currentRowWidth += subviewSize.width + spacing
-        }
-        
-        if !currentRow.subviews.isEmpty {
-            rows.append(currentRow)
-        }
-        
-        return rows
-    }
-    
-    private struct Row {
-        var subviews: [LayoutSubview] = []
-        var maxHeight: CGFloat = 0
-    }
-}
+
 
 #Preview {
     DateIdeasView()
