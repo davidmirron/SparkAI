@@ -42,7 +42,7 @@ struct DateIdeasView: View {
                     VStack(spacing: 20) {
                         // Title and Navigation
                         HStack {
-                            Button(action: { appState.currentScreen = .camera }) {
+                            Button(action: { appState.currentScreen = .onboarding }) {
                                 Image(systemName: "chevron.left")
                                     .font(.title2)
                                     .fontWeight(.medium)

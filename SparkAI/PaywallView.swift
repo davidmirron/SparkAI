@@ -177,8 +177,8 @@ struct PaywallView: View {
                         VStack(spacing: 20) {
                             Button(action: {
                                 withAnimation(.spring()) {
-                                    appState.isSubscribed = true
-                                    appState.currentScreen = .camera
+                                    // Simulate subscription success
+                                    appState.currentScreen = .dateIdeas
                                 }
                             }) {
                                 HStack(spacing: 12) {
@@ -223,7 +223,7 @@ struct PaywallView: View {
                             // Skip option
                             Button(action: {
                                 withAnimation(.spring()) {
-                                    appState.currentScreen = .camera
+                                    appState.currentScreen = .dateIdeas
                                 }
                             }) {
                                 Text("Continue with Free Version")

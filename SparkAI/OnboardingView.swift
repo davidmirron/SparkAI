@@ -60,24 +60,24 @@ struct OnboardingView: View {
                             }
                         }
                         
-                        // Value Proposition (Tinder-style)
+                        // Value Proposition (simplified)
                         VStack(spacing: 24) {
                             FeatureRow(
-                                icon: "camera.fill",
-                                title: "Snap Together",
-                                description: "Take a quick selfie or skip the photo"
-                            )
-                            
-                            FeatureRow(
                                 icon: "sparkles",
-                                title: "Get Ideas",
-                                description: "AI generates personalized date experiences"
+                                title: "AI-Powered Ideas",
+                                description: "Get personalized date suggestions instantly"
                             )
                             
                             FeatureRow(
                                 icon: "heart.fill",
                                 title: "Create Memories",
                                 description: "From free adventures to romantic evenings"
+                            )
+                            
+                            FeatureRow(
+                                icon: "star.fill",
+                                title: "Discover Together",
+                                description: "Find new experiences in your area"
                             )
                         }
                         .padding(.horizontal, 40)
@@ -129,18 +129,18 @@ struct OnboardingView: View {
                     
                     Spacer()
                     
-                    // CTA Section (Bumble-style)
+                    // CTA Section (simplified)
                     VStack(spacing: 20) {
                         Button(action: {
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                appState.currentScreen = .camera
+                                appState.currentScreen = .dateIdeas
                             }
                         }) {
                             HStack {
-                                Image(systemName: "camera.fill")
+                                Image(systemName: "sparkles")
                                     .font(.system(size: 20, weight: .semibold))
                                 
-                                Text("Start Creating Memories")
+                                Text("Get Date Ideas")
                                     .font(.system(size: 18, weight: .bold))
                                 
                                 Image(systemName: "arrow.right")
